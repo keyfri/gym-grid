@@ -29,13 +29,13 @@ class GridWorld(gym.Env):
     self.absorbing_state = self.n_states - 1
     self.done = False
     self.start_state = start_state #if not isinstance(start_state, str) else np.random.rand(n**2)
-    self._reset()
+    self.reset()
 
     self.action_space = spaces.Discrete(4)
     self.observation_space = spaces.Discrete(self.n_states) # with absorbing state
-    #self._seed()
+    self._seed()
 
-  def _step(self, action):
+  def step(self, action):
     assert self.action_space.contains(action)
 
     if self.state == self.terminal_state:
@@ -65,6 +65,16 @@ class GridWorld(gym.Env):
 
     return self.state, reward, self.done, None
 
+  def render(self, mode='rgb_array', n=None, close=None):
+        if close: return
+        if n is None:
+            n = 2
+        if mode == 'rgb_array':
+            data = self._get_colour_view(self.state, n )
+            # Coded image
+            return data
+        return None
+        
   def _get_reward(self, new_state=None):
     if self.done:
       return self.terminal_reward
@@ -101,10 +111,14 @@ class GridWorld(gym.Env):
     return col * self.n + row
 
 
-  def _reset(self):
+  def reset(self):
     self.state = self.start_state if not isinstance(self.start_state, str) else np.random.randint(self.n_states - 1)
     self.done = False
     return self.state
+
+  def _seed(self, seed=None):
+        self.np_random, seed = seeding.np_random(seed)
+        return [seed]
 
   def _render(self, mode='human', close=False):
     pass

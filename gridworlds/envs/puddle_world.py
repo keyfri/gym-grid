@@ -113,7 +113,7 @@ class PuddleWorld(gym.Env):
         self.set_start_state(start_states, start_state_ind)        
 
         # Simulation related variables
-        self._reset()
+        self.reset()
         self._seed()
 
         self.action_space = spaces.Discrete(4)
@@ -142,7 +142,7 @@ class PuddleWorld(gym.Env):
         else:
             self.start_states = start_states
 
-    def _step(self, action):
+    def step(self, action):
         assert self.action_space.contains(action)
         info = {}
 
@@ -321,7 +321,7 @@ class PuddleWorld(gym.Env):
         return col * self.n + row
 
 
-    def _reset(self):
+    def reset(self):
         if(self.start_state_ind is None): # i.e. if start state is not fixed
             start_state_ind = np.random.randint(len(self.start_states))
         else:
@@ -402,10 +402,10 @@ class PuddleWorld_random(PuddleWorld):
         self.map = m
 
     
-    def _reset(self):
+    def reset(self):
         #Randomising map at each run
         self.reload_random(); 
-        return super(PuddleWorld_random, self)._reset()
+        return super(PuddleWorld_random, self).reset()
 
 class RoomWorld(PuddleWorld):
 # Bounded 2 Rooms w/exit to train sub-policies
@@ -510,17 +510,17 @@ class RoomWorld(PuddleWorld):
         self.set_start_state(start_states,self.start_state_ind)
         self.set_term_state()
 
-    def _step(self, action):
-        return_val = super(RoomWorld, self)._step(action) # state, reward, done, _
+    def step(self, action):
+        return_val = super(RoomWorld, self).step(action) # state, reward, done, _
         if not return_val[2]:
             [row, col] = self.ind2coord(return_val[0]) 
             self.goal_count_dict[self.room_map[row,col]] -= self.found_fruit_in_last_turn # Reduce room index fruit counter if fruit was found
         return return_val
     
-    def _reset(self):
+    def reset(self):
         #Randomising map at each run
         self.reload_random(); 
-        return super(RoomWorld, self)._reset()
+        return super(RoomWorld, self).reset()
 
 class RoomWorldObject(RoomWorld):
     ''' Bounded 2 Rooms w/exit. Need to pick up all fruits and reach gap to complete task
@@ -528,9 +528,9 @@ class RoomWorldObject(RoomWorld):
     Hard task for large n! Without a non-markovian policy, will need to square view large 
     (to keep fruits in view, thus the agent realising there's work to be done before leaving) '''
 
-    def _step(self, action): # To set goal once all fruits are taken
+    def step(self, action): # To set goal once all fruits are taken
         # First take care of room index fruit counter
-        return_val = super(RoomWorldObject, self)._step(action) # state, reward, done, _
+        return_val = super(RoomWorldObject, self).step(action) # state, reward, done, _
         self.num_fruits_left -= self.found_fruit_in_last_turn # Reduce total fruit counter if fruit was found
         if self.num_fruits_left <= 0: # set goal state to gap if no fruits in map
             self.map[self.gap_i, self.gap_j] = WORLD_INVISIBLE_GOAL
@@ -550,9 +550,9 @@ class RoomWorldObject(RoomWorld):
 class RoomWorldObjectFixed(RoomWorld):
     ''' Bounded 2 Rooms w/exit. Same as before but not random at each run '''
 
-    def _step(self, action): # To set goal once all fruits are taken
+    def step(self, action): # To set goal once all fruits are taken
         # First take care of room index fruit counter
-        return_val = super(RoomWorldObjectFixed, self)._step(action) # state, reward, done, _
+        return_val = super(RoomWorldObjectFixed, self).step(action) # state, reward, done, _
         self.num_fruits_left -= self.found_fruit_in_last_turn # Reduce total fruit counter if fruit was found
         if self.num_fruits_left <= 0: # set goal state to gap if no fruits in map
             self.map[self.gap_i, self.gap_j] = WORLD_INVISIBLE_GOAL
@@ -569,7 +569,7 @@ class RoomWorldObjectFixed(RoomWorld):
         self.set_start_state(start_states,self.start_state_ind)
         self.set_term_state()
 
-    def _reset(self):
+    def reset(self):
         # Clear up existing fruits
         self.map[self.map==WORLD_FRUIT] = WORLD_FREE
         # No longer Randomising map at each run
@@ -579,7 +579,7 @@ class RoomWorldObjectFixed(RoomWorld):
         self.make_goal_count_dict(self.map, self.room_map)
         self.set_start_state([[self.gap_i, self.gap_j]],self.start_state_ind)
         self.set_term_state()
-        return super(RoomWorld, self)._reset()
+        return super(RoomWorld, self).reset()
 
 class RoomWorldFinal(PuddleWorld):
     ''' Set of 6 rooms. Need to pick up all fruits and reach gap to complete task
@@ -643,8 +643,8 @@ class RoomWorldFinal(PuddleWorld):
 
         return m
 
-    def _step(self, action):
-        return_val = super(RoomWorldFinal, self)._step(action) # state, reward, done, _
+    def step(self, action):
+        return_val = super(RoomWorldFinal, self).step(action) # state, reward, done, _
         if not return_val[2]:
             [row, col] = self.ind2coord(return_val[0])
             self.goal_count_dict[self.room_map[row,col]] -= self.found_fruit_in_last_turn # Reduce room index fruit counter if fruit was found

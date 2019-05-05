@@ -52,11 +52,11 @@ class FourRooms(gym.Env):
     start_room = 0
     sz = self.room_sizes[start_room]
     self.start_state = self.offsets[start_room] + np.random.randint(sz[0]*sz[1] - 1)
-    self._reset()
+    self.reset()
 
     self.action_space = spaces.Discrete(4)
     self.observation_space = spaces.Discrete(self.n_states) # with absorbing state
-
+    self._seed()
 
   def ind2coord(self, index, sizes=None):
     if sizes is None:
@@ -113,7 +113,7 @@ class FourRooms(gym.Env):
       coord_in_room = self.ind2coord(index - self.offsets[room], sizes=self.room_sizes[room])
     return room, coord_in_room # hallway
 
-  def _step(self, action):
+  def step(self, action):
     assert self.action_space.contains(action)
 
     if self.state == self.terminal_state:
@@ -157,7 +157,15 @@ class FourRooms(gym.Env):
 
     return new_state, reward, self.done, None
 
-
+  def render(self, mode='rgb_array', n=None, close=None):
+        if close: return
+        if n is None:
+            n = 2
+        if mode == 'rgb_array':
+            data = self._get_colour_view(self.state, n )
+            # Coded image
+            return data
+        return None
 
 
   def _get_reward(self, new_state=None):
@@ -176,10 +184,14 @@ class FourRooms(gym.Env):
     return (row == 0 or row == self.n - 1 or col == 0 or col == self.n - 1)
 
 
-  def _reset(self):
+  def reset(self):
     self.state = self.start_state if not isinstance(self.start_state, str) else np.random.randint(self.n_states - 1)
     self.done = False
     return self.state
+  
+  def _seed(self, seed=None):
+        self.np_random, seed = seeding.np_random(seed)
+        return [seed]
 
   def _render(self, mode='human', close=False):
     pass
