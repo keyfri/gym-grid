@@ -54,7 +54,7 @@ class PuddleWorld(gym.Env):
             theFile.close()
         # Load a map if no init map provided
         if(init_map is None):
-            assert(world_file_path is not None)
+            # assert(world_file_path is not None)
             if world_file_path is not None:
                 if not os.path.exists(world_file_path):
                     # Now search the saved_maps folder
@@ -94,7 +94,7 @@ class PuddleWorld(gym.Env):
             self.goal_count_dict = None
         
 
-        # self.n = n # Uncomment when not loading map
+        self.n = n # Uncomment when not loading map
         self.noise = noise
         self.confusion = confusion
         self.terminal_reward = terminal_reward
@@ -342,7 +342,7 @@ class PuddleWorld(gym.Env):
 class PuddleWorldA(PuddleWorld):
 
     def __init__(self):
-        super(PuddleWorldA, self).__init__(world_file_path="PuddleWorldA.dat")
+        super(PuddleWorldA, self).__init__(world_file_path="PuddleWorldA.dat", )
 
 class PuddleWorldB(PuddleWorld):
 
